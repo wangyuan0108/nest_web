@@ -19,7 +19,7 @@ db:
     host: 'localhost'
     username: 'root'
     password: '123456'
-    database: 'kapok'
+    database: 'blog'
     port: 3306
     charser: 'utf8mb4'
     logger: 'advanced-console'
@@ -45,7 +45,13 @@ jwt:
 # 权限 白名单配置
 perm:
   router:
-    whitelist: [{ path: '/api/register', method: 'POST'  }, { path: '/api/login', method: 'POST' }, { path: '/api/perm/{id}', method: 'GET' }, { path: '/api/oss/upload', method: 'POST' }]
+    whitelist:
+      [
+        { path: '/api/register', method: 'POST' },
+        { path: '/api/login', method: 'POST' },
+        { path: '/api/perm/{id}', method: 'GET' },
+        { path: '/api/oss/upload', method: 'POST' },
+      ]
 
 # 用户相关
 # 初始密码， 重置密码
