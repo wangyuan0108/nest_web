@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  // HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,7 +28,7 @@ export class UserController {
   @Get()
   findAll() {
     console.log('configService===', this.configService.get('db'));
-
+    // throw new HttpException('文章已存在', 401);
     return this.userService.findAll();
   }
 
