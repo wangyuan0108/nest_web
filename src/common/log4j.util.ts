@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Path from 'path';
-import Log4js from 'log4js';
+import * as Path from 'path';
+import * as Log4js from 'log4js';
 import Util from 'util';
-import dayjs from 'dayjs'; // 处理时间的工具
+import * as dayjs from 'dayjs'; // 处理时间的工具
 import * as StackTrace from 'stacktrace-js';
-import Chalk from 'chalk';
+import * as Chalk from 'chalk';
 import config from '../config/index';
 
 const appLogDirConfig = config().app.logger.dir;
@@ -107,7 +107,7 @@ Log4js.configure({
   appenders: {
     console: {
       type: 'console',
-      layout: { type: 'Nest-Admin' },
+      layout: { type: 'nest-api' },
     },
     access: {
       type: 'dateFile',
