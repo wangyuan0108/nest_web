@@ -32,7 +32,6 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         return {
           type: 'mysql',
           // 可能不再支持这种方式，entities 将改成接收 实体类的引用
-          //
           // entities: [`${__dirname}/**/*.entity{.ts,.js}`],
           autoLoadEntities: true,
           keepConnectionAlive: true,

@@ -1,12 +1,16 @@
 import rateLimit from 'express-rate-limit';
 import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { TransformInterceptor } from './common/transform.interceptor';
-import { HttpExceptionFilter } from './common/http-exceptions-filter';
+import { TransformInterceptor } from './common/libs/log4js/transform.interceptor';
+import { HttpExceptionFilter } from './common/libs/log4js/http-exceptions-filter';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { mw as requestIpMw } from 'request-ip';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
+import { logger } from './common/libs/log4js/logger.middleware';
 
 async function bootstrap() {
   // 实例化并开启跨域
@@ -26,17 +30,45 @@ async function bootstrap() {
   app.setGlobalPrefix(prefix);
 
   // web安全
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+      crossOriginResourcePolicy: false,
+    }),
+  );
+
+  // 设置swagger文档
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('管理后台')
+    .setDescription('管理后台接口文档')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
 
   // 获取真实 ip
   app.use(requestIpMw({ attributeName: 'ip' }));
 
+  // 解析请求体
+  app.use(express.json());
+
+  // 解析表单
+  app.use(express.urlencoded({ extended: true }));
+  // 日志
+  app.use(logger);
   // 全局参数验证
   app.useGlobalPipes(new ValidationPipe());
   // 全局返回结果拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
+  // 所有异常
+  // app.useGlobalFilters(new ExceptionsFilter());
   // http错误过滤器
-  app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(3000);
+  app.useGlobalFilters(new HttpExceptionFilter(), new ExceptionsFilter());
+
+  // 获取配置文件中的端口号
+  const port = config.get<number>('app.port');
+  await app.listen(port);
 }
+
 bootstrap();

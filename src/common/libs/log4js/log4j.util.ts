@@ -5,7 +5,7 @@ import Util from 'util';
 import * as dayjs from 'dayjs'; // 处理时间的工具
 import * as StackTrace from 'stacktrace-js';
 import * as Chalk from 'chalk';
-import config from '../config/index';
+import config from '../../../config';
 
 const appLogDirConfig = config().app.logger.dir;
 
