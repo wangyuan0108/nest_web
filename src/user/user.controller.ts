@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
   // HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -37,6 +41,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @ApiOperation({ summary: '参数获取' })
+  @Get('find')
+  query(@Query('name') name: string, @Query('age') age: number) {
+    return `后端接收的query参数: name=${name},age=${age}`;
+  }
+
   @ApiOperation({ summary: '用户详情' })
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -53,5 +63,19 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('file')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      dest: 'uploads/',
+    }),
+  )
+  body2(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    console.log(files);
+    return `received: ${JSON.stringify(createUserDto)}`;
   }
 }

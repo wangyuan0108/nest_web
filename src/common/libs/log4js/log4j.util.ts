@@ -38,7 +38,7 @@ export class ContextTrace {
   ) {}
 }
 
-Log4js.addLayout('nest-api', (logConfig: any) => {
+Log4js.addLayout('nest_web_api', (logConfig: any) => {
   return (logEvent: Log4js.LoggingEvent): string => {
     let moduleName = '';
     let position = '';
@@ -107,7 +107,7 @@ Log4js.configure({
   appenders: {
     console: {
       type: 'console',
-      layout: { type: 'nest-api' },
+      layout: { type: 'nest_web_api' },
     },
     access: {
       type: 'dateFile',

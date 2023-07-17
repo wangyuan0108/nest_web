@@ -11,10 +11,15 @@ import { mw as requestIpMw } from 'request-ip';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
 import { logger } from './common/libs/log4js/logger.middleware';
-
+import { Logger } from './common/libs/log4js/log4j.util';
+import * as Chalk from 'chalk';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  // 实例化并开启跨域
-  const app = await NestFactory.create(AppModule, { cors: true });
+  // 实例化并开启跨域 NestExpressApplication是为了使用express的中间件
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: true,
+  });
 
   // 设置访问频率
   app.use(
@@ -30,12 +35,12 @@ async function bootstrap() {
   app.setGlobalPrefix(prefix);
 
   // web安全
-  app.use(
-    helmet({
-      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-      crossOriginResourcePolicy: false,
-    }),
-  );
+  // app.use(
+  //   helmet({
+  //     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  //     crossOriginResourcePolicy: false,
+  //   }),
+  // );
 
   // 设置swagger文档
   const swaggerConfig = new DocumentBuilder()
@@ -45,10 +50,12 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup(`${prefix}/docs`, app, document);
 
   // 获取真实 ip
   app.use(requestIpMw({ attributeName: 'ip' }));
+
+  app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static' });
 
   // 解析请求体
   app.use(express.json());
@@ -69,6 +76,19 @@ async function bootstrap() {
   // 获取配置文件中的端口号
   const port = config.get<number>('app.port');
   await app.listen(port);
+
+  Logger.log(
+    Chalk.green(`nest_web_api 服务启动成功 `),
+    '\n',
+    Chalk.green('服务地址'),
+    `                http://localhost:${port}${prefix}/`,
+    '\n',
+    Chalk.green('swagger 文档地址        '),
+    `http://localhost:${port}${prefix}/docs/`,
+    '\n',
+    Chalk.green('静态文件地址        '),
+    `http://localhost:${port}/static/`,
+  );
 }
 
 bootstrap();
