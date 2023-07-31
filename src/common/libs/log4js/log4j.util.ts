@@ -15,6 +15,8 @@ const baseLogPath = Path.normalize(
     : Path.join(process.cwd(), appLogDirConfig),
 );
 
+console.log('baseLogPath======', baseLogPath);
+
 // 日志级别
 export enum LoggerLevel {
   ALL = 'ALL',

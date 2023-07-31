@@ -9,13 +9,14 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  UploadedFile,
   // HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -67,15 +68,16 @@ export class UserController {
 
   @Post('file')
   @UseInterceptors(
-    AnyFilesInterceptor({
+    FileInterceptor('aaa', {
       dest: 'uploads/',
     }),
   )
-  body2(
-    @Body() createUserDto: CreateUserDto,
-    @UploadedFiles() files: Array<Express.Multer.File>,
-  ) {
-    console.log(files);
-    return `received: ${JSON.stringify(createUserDto)}`;
+  uploadFile(@UploadedFile() file: Express.Multer.File, @Body() body) {
+    console.log('body', body);
+    console.log('file', file);
+
+    return {
+      url: `http://localhost:3000/${file.path}`,
+    };
   }
 }
