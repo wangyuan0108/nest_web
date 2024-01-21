@@ -4,6 +4,8 @@ import { UserModule } from './user/user.module';
 import configuration from './config/index';
 import * as Joi from 'joi';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { RedisModule } from './common/libs/redis/redis.module';
+import { RedisClientOptions } from '@liaoliaots/nestjs-redis';
 
 @Module({
   imports: [
@@ -45,6 +47,23 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         } as TypeOrmModuleOptions;
       },
     }),
+    // redis
+    RedisModule.forRootAsync(
+      {
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => {
+          return {
+            closeClient: true,
+            readyLog: true,
+            errorLog: true,
+            config: config.get<RedisClientOptions>('redis'),
+          };
+        },
+      },
+      true,
+    ), // RedisModule.forRootAsync({
+    // 业务模块
     UserModule,
   ],
   controllers: [],
