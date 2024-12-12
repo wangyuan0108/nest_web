@@ -1,14 +1,17 @@
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { RedisService as re } from '@liaoliaots/nestjs-redis';
 import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService {
-  constructor(@InjectRedis() private readonly client: Redis) {}
-
-  getClient(): Redis {
-    return this.client;
+  private readonly client: Redis | null;
+  constructor(private readonly redisService: re) {
+    this.client = this.redisService.getOrThrow();
   }
+
+  // getClient(): Redis {
+  //   return this.client;
+  // }
 
   /* --------------------- string 相关 -------------------------- */
 
