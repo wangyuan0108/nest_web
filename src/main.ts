@@ -1,5 +1,5 @@
 import rateLimit from 'express-rate-limit';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -19,6 +19,7 @@ async function bootstrap() {
   // 实例化并开启跨域 NestExpressApplication是为了使用express的中间件
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
+    logger: false,
   });
 
   // 设置访问频率
@@ -29,7 +30,9 @@ async function bootstrap() {
     }),
   );
 
+  // 获取配置文件
   const config = app.get(ConfigService);
+
   // 设置api访问前缀
   const prefix = config.get<string>('app.prefix');
   app.setGlobalPrefix(prefix);
@@ -52,11 +55,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup(`${prefix}/docs`, app, document);
 
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   // 获取真实 ip
   app.use(requestIpMw({ attributeName: 'ip' }));
 
+  // 设置静态文件
   app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static' });
 
   // 解析请求体
@@ -75,23 +78,20 @@ async function bootstrap() {
   // app.useGlobalFilters(new HttpExceptionFilter(), new ExceptionsFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   // 获取配置文件中的端口号
   const port = config.get<number>('app.port');
   await app.listen(port);
 
-  // Logger.log(
-  //   Chalk.green(`nest_web_api 服务启动成功 `),
-  //   '\n',
-  //   Chalk.green('服务地址'),
-  //   `                http://localhost:${port}${prefix}/`,
-  //   '\n',
-  //   Chalk.green('swagger 文档地址        '),
-  //   `http://localhost:${port}${prefix}/docs/`,
-  //   '\n',
-  //   Chalk.green('静态文件地址        '),
-  //   `http://localhost:${port}/static/`,
-  // );
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+
+  logger.log(
+    `${Chalk.green(`nest_web_api 服务启动成功 `)}\n${Chalk.green('服务地址')}                http://localhost:${port}${prefix}/\n${Chalk.green('swagger 文档地址        ')}http://localhost:${port}${prefix}/docs/\n${Chalk.green('静态文件地址        ')}http://localhost:${port}/static/`,
+    '\n',
+    Chalk.green('静态文件地址        '),
+    `http://localhost:${port}/static/`,
+  );
 }
 
 bootstrap();

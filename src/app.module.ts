@@ -72,6 +72,16 @@ import LoggerMiddleware from './middleware/logger.middleware'
     ), 
     WinstonModule.forRoot({
       transports: [
+        // 控制台输出
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.colorize(),
+            winston.format.printf(({ level, message, timestamp }) => {
+              return `${timestamp} [${level}] : ${message}`;
+            }),
+          ),
+        }),
         new winston.transports.DailyRotateFile({
           dirname: `logs`, // 日志保存的目录
           filename: '%DATE%.log', // 日志名称，占位符 %DATE% 取值为 datePattern 值。
