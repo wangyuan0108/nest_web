@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Logger } from './log4j.util';
+// import { Logger } from './log4j.util';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
@@ -24,8 +24,8 @@ export class TransformInterceptor implements NestInterceptor {
         User: ${JSON.stringify(req.user)}
         Response data: ${JSON.stringify(data.data)}
         -----------------------------------------------------------------------`;
-        Logger.info(logFormat);
-        Logger.access(logFormat);
+        // Logger.info(logFormat);
+        // Logger.access(logFormat);
         return data;
       }),
     );

@@ -3,18 +3,18 @@ import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { TransformInterceptor } from './common/libs/log4js/transform.interceptor';
-import { HttpExceptionFilter } from './common/libs/log4js/http-exceptions-filter';
+import { TransformInterceptor } from './interceptors/tranform.interceptor';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { mw as requestIpMw } from 'request-ip';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
-import { logger } from './common/libs/log4js/logger.middleware';
-import { Logger } from './common/libs/log4js/log4j.util';
+// import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
+
 import * as Chalk from 'chalk';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 async function bootstrap() {
   // 实例化并开启跨域 NestExpressApplication是为了使用express的中间件
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -52,6 +52,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup(`${prefix}/docs`, app, document);
 
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+
   // 获取真实 ip
   app.use(requestIpMw({ attributeName: 'ip' }));
 
@@ -62,8 +64,7 @@ async function bootstrap() {
 
   // 解析表单
   app.use(express.urlencoded({ extended: true }));
-  // 日志
-  app.use(logger);
+  
   // 全局参数验证
   app.useGlobalPipes(new ValidationPipe());
   // 全局返回结果拦截器
@@ -71,24 +72,26 @@ async function bootstrap() {
   // 所有异常
   // app.useGlobalFilters(new ExceptionsFilter());
   // http错误过滤器
-  app.useGlobalFilters(new HttpExceptionFilter(), new ExceptionsFilter());
+  // app.useGlobalFilters(new HttpExceptionFilter(), new ExceptionsFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
+
 
   // 获取配置文件中的端口号
   const port = config.get<number>('app.port');
   await app.listen(port);
 
-  Logger.log(
-    Chalk.green(`nest_web_api 服务启动成功 `),
-    '\n',
-    Chalk.green('服务地址'),
-    `                http://localhost:${port}${prefix}/`,
-    '\n',
-    Chalk.green('swagger 文档地址        '),
-    `http://localhost:${port}${prefix}/docs/`,
-    '\n',
-    Chalk.green('静态文件地址        '),
-    `http://localhost:${port}/static/`,
-  );
+  // Logger.log(
+  //   Chalk.green(`nest_web_api 服务启动成功 `),
+  //   '\n',
+  //   Chalk.green('服务地址'),
+  //   `                http://localhost:${port}${prefix}/`,
+  //   '\n',
+  //   Chalk.green('swagger 文档地址        '),
+  //   `http://localhost:${port}${prefix}/docs/`,
+  //   '\n',
+  //   Chalk.green('静态文件地址        '),
+  //   `http://localhost:${port}/static/`,
+  // );
 }
 
 bootstrap();
