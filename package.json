@@ -39,7 +39,6 @@
     "ioredis": "^5.4.1",
     "joi": "^17.13.3",
     "js-yaml": "^4.1.0",
-    "log4js": "^6.9.1",
     "mysql2": "^3.11.5",
     "nest-winston": "^1.9.7",
     "reflect-metadata": "^0.2.2",
