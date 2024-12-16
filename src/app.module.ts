@@ -1,10 +1,10 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from './user/user.module';
+import { UserModule } from './modules/user/user.module';
 import configuration from './config/index';
 import * as Joi from 'joi';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { RedisModule } from './common/libs/redis/redis.module';
+import { RedisModule } from './common/redis/redis.module';
 import { RedisClientOptions } from '@liaoliaots/nestjs-redis';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
