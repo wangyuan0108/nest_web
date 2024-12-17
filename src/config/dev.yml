@@ -19,7 +19,7 @@ db:
     host: 'localhost'
     username: 'root'
     password: '123456'
-    database: 'blog'
+    database: 'nest_web'
     port: 3306
     charser: 'utf8mb4'
     logger: 'advanced-console'

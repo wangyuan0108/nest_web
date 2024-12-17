@@ -42,6 +42,24 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @ApiOperation({ summary: '保存redis' })
+  @Get('saveRedis')
+  saveRedis() {
+    return this.userService.saveRedis();
+  }
+
+  @ApiOperation({ summary: '获取redis' })
+  @Get('getRedis')
+  getRedis() {
+    return this.userService.getRedis();
+  }
+
+  @ApiOperation({ summary: '删除redis' })
+  @Get('removeRedis')
+  removeRedis() {
+    return this.userService.removeRedis();
+  }
+
   @ApiOperation({ summary: '参数获取' })
   @Get('find')
   query(@Query('name') name: string, @Query('age') age: number) {
