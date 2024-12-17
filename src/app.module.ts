@@ -3,8 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import configuration from './config/index';
 import * as Joi from 'joi';
+import * as dayjs from 'dayjs';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { RedisModule } from './common/redis/redis.module';
+import { RedisModule } from './common/shared/redis/redis.module';
 import { RedisClientOptions } from '@liaoliaots/nestjs-redis';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -12,6 +13,7 @@ import 'winston-daily-rotate-file';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionsFilter } from './filters/exceptions.filter';
 import LoggerMiddleware from './middleware/logger.middleware'
+import * as chalk from 'chalk';
 
 
 @Module({
@@ -78,24 +80,71 @@ import LoggerMiddleware from './middleware/logger.middleware'
             winston.format.timestamp(),
             winston.format.colorize(),
             winston.format.printf(({ level, message, timestamp }) => {
-              return `${timestamp} [${level}] : ${message}`;
+              const nest = chalk.green('[Nest]');
+              const time = chalk.yellow(`${dayjs(timestamp as string).format('YYYY-MM-DD HH:mm:ss')}`);
+               // 根据不同的日志级别使用不同的颜色
+               const levelColor = {
+                error: chalk.red,
+                warn: chalk.yellow,
+                info: chalk.green,
+                debug: chalk.blue,
+                verbose: chalk.cyan,
+                silly: chalk.gray,
+              }[level] || chalk.white;
+              const levelStr = levelColor(`[${level}]`);
+              return `${nest} ${time} ${levelStr} : ${chalk.green(message)}`;
             }),
           ),
         }),
         new winston.transports.DailyRotateFile({
-          dirname: `logs`, // 日志保存的目录
-          filename: '%DATE%.log', // 日志名称，占位符 %DATE% 取值为 datePattern 值。
-          datePattern: 'YYYY-MM-DD', // 日志轮换的频率，此处表示每天。
-          zippedArchive: true, // 是否通过压缩的方式归档被轮换的日志文件。
-          maxSize: '20m', // 设置日志文件的最大大小，m 表示 mb 。
-          maxFiles: '14d', // 保留日志文件的最大天数，此处表示自动删除超过 14 天的日志文件。
-          // 记录时添加时间戳信息
+          dirname: `logs/system`, 
+          filename: 'system-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '14d',
           format: winston.format.combine(
             winston.format.timestamp({
-            	format: 'YYYY-MM-DD HH:mm:ss',
+              format: 'YYYY-MM-DD HH:mm:ss',
             }),
             winston.format.json(),
           ),
+          // 只记录系统相关的日志
+          level: 'info',
+        }),
+        // Application logs
+        new winston.transports.DailyRotateFile({
+          dirname: `logs/app`,
+          filename: 'app-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '14d',
+          format: winston.format.combine(
+            winston.format.timestamp({
+              format: 'YYYY-MM-DD HH:mm:ss',
+            }),
+            winston.format.json(),
+          ),
+          // 只记录应用相关的日志
+          level: 'info',
+        }),
+         // Error logs
+         new winston.transports.DailyRotateFile({
+          dirname: `logs/error`,
+          filename: 'error-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '14d',
+          format: winston.format.combine(
+            winston.format.timestamp({
+              format: 'YYYY-MM-DD HH:mm:ss',
+            }),
+            winston.format.json(),
+          ),
+          // 只记录错误日志
+          level: 'error',
         }),
       ],
     }),
