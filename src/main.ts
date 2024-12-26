@@ -6,11 +6,12 @@ import { AppModule } from './app.module';
 import { TransformInterceptor } from './interceptors/tranform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
+import compression from 'compression';
+
 import helmet from 'helmet';
 import { mw as requestIpMw } from 'request-ip';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as fs from 'fs';
-// import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
 
 import * as Chalk from 'chalk';
 import { join } from 'path';
@@ -28,24 +29,32 @@ async function bootstrap() {
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15分钟
       max: 1000, // 限制15分钟内最多只能访问1000次
+      message: 'Too many requests from this IP, please try again later',
+      keyGenerator: req => requestIpMw.getClientIp(req),
     }),
   );
 
   // 获取配置文件
   const config = app.get(ConfigService);
 
+
+  // 跨域
+  app.enableCors();
+
   // 设置api访问前缀
   const prefix = config.get<string>('app.prefix');
   app.setGlobalPrefix(prefix);
 
   // web安全
-  // app.use(
-  //   helmet({
-  //     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-  //     crossOriginResourcePolicy: false,
-  //   }),
-  // );
+  app.use(
+    helmet({
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+      crossOriginResourcePolicy: false,
+    }),
+  );
 
+  // 压缩
+  app.use(compression());
   // 设置swagger文档
   const swaggerConfig = new DocumentBuilder()
     .setTitle('管理后台')
@@ -91,7 +100,12 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true }));
   
   // 全局参数验证
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    // forbidNonWhitelisted: true,
+
+  }));
   // 全局返回结果拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
   // 所有异常
