@@ -30,13 +30,12 @@ async function bootstrap() {
       windowMs: 15 * 60 * 1000, // 15分钟
       max: 1000, // 限制15分钟内最多只能访问1000次
       message: 'Too many requests from this IP, please try again later',
-      keyGenerator: req => requestIpMw.getClientIp(req),
+      keyGenerator: (req) => requestIpMw.getClientIp(req),
     }),
   );
 
   // 获取配置文件
   const config = app.get(ConfigService);
-
 
   // 跨域
   app.enableCors();
@@ -71,21 +70,20 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-   // 导出 OpenAPI JSON 文件
-   fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+  // 导出 OpenAPI JSON 文件
+  fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
 
-  SwaggerModule.setup(`${prefix}/docs`, app, document,{
+  SwaggerModule.setup(`${prefix}/docs`, app, document, {
     jsonDocumentUrl: `${prefix}/docs-json`,
     swaggerOptions: {
       urls: [
         {
-          url: `${prefix}/docs-json`,  // JSON文档URL
-          name: 'API JSON'
-        }
+          url: `${prefix}/docs-json`, // JSON文档URL
+          name: 'API JSON',
+        },
       ],
-    }
+    },
   });
-
 
   // 获取真实 ip
   app.use(requestIpMw({ attributeName: 'ip' }));
@@ -98,14 +96,15 @@ async function bootstrap() {
 
   // 解析表单
   app.use(express.urlencoded({ extended: true }));
-  
-  // 全局参数验证
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    // forbidNonWhitelisted: true,
 
-  }));
+  // 全局参数验证
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      // forbidNonWhitelisted: true,
+    }),
+  );
   // 全局返回结果拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
   // 所有异常

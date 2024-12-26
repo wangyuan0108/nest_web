@@ -12,10 +12,9 @@ import * as winston from 'winston';
 import 'winston-daily-rotate-file';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionsFilter } from './filters/exceptions.filter';
-import LoggerMiddleware from './middleware/logger.middleware'
+import LoggerMiddleware from './middleware/logger.middleware';
 import * as chalk from 'chalk';
 import { User } from './modules/user/entities/user.entity';
-
 
 @Module({
   imports: [
@@ -79,7 +78,7 @@ import { User } from './modules/user/entities/user.entity';
         },
       },
       true,
-    ), 
+    ),
     WinstonModule.forRoot({
       transports: [
         // 控制台输出
@@ -89,23 +88,26 @@ import { User } from './modules/user/entities/user.entity';
             winston.format.colorize(),
             winston.format.printf(({ level, message, timestamp }) => {
               const nest = chalk.green('[Nest]');
-              const time = chalk.yellow(`${dayjs(timestamp as string).format('YYYY-MM-DD HH:mm:ss')}`);
-               // 根据不同的日志级别使用不同的颜色
-               const levelColor = {
-                error: chalk.red,
-                warn: chalk.yellow,
-                info: chalk.green,
-                debug: chalk.blue,
-                verbose: chalk.cyan,
-                silly: chalk.gray,
-              }[level] || chalk.white;
+              const time = chalk.yellow(
+                `${dayjs(timestamp as string).format('YYYY-MM-DD HH:mm:ss')}`,
+              );
+              // 根据不同的日志级别使用不同的颜色
+              const levelColor =
+                {
+                  error: chalk.red,
+                  warn: chalk.yellow,
+                  info: chalk.green,
+                  debug: chalk.blue,
+                  verbose: chalk.cyan,
+                  silly: chalk.gray,
+                }[level] || chalk.white;
               const levelStr = levelColor(`[${level}]`);
               return `${nest} ${time} ${levelStr} : ${chalk.green(message)}`;
             }),
           ),
         }),
         new winston.transports.DailyRotateFile({
-          dirname: `logs/system`, 
+          dirname: `logs/system`,
           filename: 'system-%DATE%.log',
           datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
@@ -137,8 +139,8 @@ import { User } from './modules/user/entities/user.entity';
           maxFiles: '14d',
           // 只记录应用相关的日志
           level: 'info',
-           // 添加日志过滤
-           format: winston.format.combine(
+          // 添加日志过滤
+          format: winston.format.combine(
             winston.format.timestamp({
               format: 'YYYY-MM-DD HH:mm:ss',
             }),
@@ -150,10 +152,9 @@ import { User } from './modules/user/entities/user.entity';
               return '';
             }),
           ),
-
         }),
-         // Error logs
-         new winston.transports.DailyRotateFile({
+        // Error logs
+        new winston.transports.DailyRotateFile({
           dirname: `logs/error`,
           filename: 'error-%DATE%.log',
           datePattern: 'YYYY-MM-DD',
@@ -175,10 +176,12 @@ import { User } from './modules/user/entities/user.entity';
     UserModule,
   ],
   controllers: [],
-  providers: [{
-    provide: APP_FILTER,
-    useClass: ExceptionsFilter,
-  }],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {
   // 全局中间件

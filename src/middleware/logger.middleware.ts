@@ -23,9 +23,9 @@ export default class LoggerMiddleware implements NestMiddleware {
   Body: ${JSON.stringify(req.body)}
   ##############################################################################################################
   `;
-  
+
     next();
-  
+
     if (statusCode >= 500) {
       console.log('error');
       this.logger.error(logFormat);
@@ -33,9 +33,8 @@ export default class LoggerMiddleware implements NestMiddleware {
       console.log('warn');
       this.logger.warn(logFormat);
     } else {
-      console.log('info',this.logger);
+      console.log('info', this.logger);
       this.logger.info(logFormat);
     }
   }
 }
-
