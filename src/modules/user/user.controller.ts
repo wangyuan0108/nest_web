@@ -13,8 +13,6 @@ import {
   // HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
 import {
   // AnyFilesInterceptor,
@@ -33,8 +31,8 @@ export class UserController {
 
   @ApiOperation({ summary: '创建用户' })
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  create() {
+    return this.userService.create();
   }
 
   @ApiOperation({ summary: '用户列表' })
@@ -77,8 +75,8 @@ export class UserController {
 
   @ApiOperation({ summary: '修改用户' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(@Param('id') id: string) {
+    return this.userService.update(+id);
   }
 
   @ApiOperation({ summary: '删除用户' })
