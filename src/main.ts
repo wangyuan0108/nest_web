@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { mw as requestIpMw } from 'request-ip';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as fs from 'fs';
 // import { ExceptionsFilter } from './common/libs/log4js/exceptions-filter';
 
 import * as Chalk from 'chalk';
@@ -50,10 +51,31 @@ async function bootstrap() {
     .setTitle('管理后台')
     .setDescription('管理后台接口文档')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'JWT',
+      description: 'JWT认证',
+      in: 'header',
+    })
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup(`${prefix}/docs`, app, document);
+
+   // 导出 OpenAPI JSON 文件
+   fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+
+  SwaggerModule.setup(`${prefix}/docs`, app, document,{
+    jsonDocumentUrl: `${prefix}/docs-json`,
+    swaggerOptions: {
+      urls: [
+        {
+          url: `${prefix}/docs-json`,  // JSON文档URL
+          name: 'API JSON'
+        }
+      ],
+    }
+  });
 
 
   // 获取真实 ip
