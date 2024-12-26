@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
   UseInterceptors,
-  UploadedFiles,
+  // UploadedFiles,
   UploadedFile,
   // HttpException,
 } from '@nestjs/common';
@@ -16,7 +16,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import {
+  // AnyFilesInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
